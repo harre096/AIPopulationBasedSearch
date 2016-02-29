@@ -53,13 +53,13 @@
 (defn add-score
   "Computes the score of an answer and inserts a new :score field
    to the given answer, returning the augmented answer."
-  [answer]
-  (assoc answer :score (penalized-score answer)))
+  [scorer answer]
+  (assoc answer :score (scorer answer)))
 
 (defn random-search
   [instance max-tries]
   (apply max-key :score
-         (map add-score
+         (map (partial add-score penalized-score)
               (repeatedly max-tries #(random-answer instance)))))
 
 ;;;Test: Does random work?
@@ -73,7 +73,7 @@
 (defn find-score
   "Given an instance, find-score will look at the choices and update the totals."
   [answer]
-      (add-score
+      (add-score penalized-score
        (make-answer (:instance answer) (:choices answer))))
 
 (defn run-mutator
@@ -125,4 +125,5 @@
 ;; (random-restart flip-one-bit knapPI_16_20_1000_1 8 10000
 ;; )
 
-(hill-climber flip-one-bit knapPI_16_20_1000_1 100000)
+(hill-climber flip-one-bit knapPI_16_20_1000_1 100000
+)
