@@ -12,11 +12,6 @@
   [scorer strategy population]
   (thin-the-herd scorer population (strategy population)))
 
-(defn simple-mutation
-  "Applies flip-one-bit to a population."
-  [population]
-  (map flip-one-bit population))
-
 (defn thin-the-herd
   "Takes an old and new population. Finds the top half."
   [scorer old new]
@@ -24,6 +19,41 @@
     (sort-by :score
       (map (partial add-score scorer) (concat old new)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;Search Strategies;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn simple-mutation
+  "Applies flip-one-bit to a population."
+  [mutator population]
+  (map mutator population))
+
+(defn crossover
+  "Picks two random parents from the population. Make a new child using given method.
+   Repeat this until we have the same number of children there were parents."
+  [method population]
+    (repeatedly
+      (count population)
+      #(method (rand-nth population) (rand-nth population))))
+
+(defn uniform-crossover
+  "For each position in a child's bit string, pick the value from a random parent's
+  bit string."
+  [mom dad]
+  (make-answer
+    ; doesn't matter which parent we take the instance from
+    (:instance mom)
+    (map rand-nth
+      (map vector (:choices mom) (:choices dad)))))
+
+(defn n-point-crossover
+  "Creates a child from an n-point crossover of two parents."
+  [n mom dad]
+  (let
+    [split-points (sort (distinct (repeatedly n #(rand-int (count (:choices mom))))))]
+    split-points))
+
+(n-point-crossover 4 (random-answer knapPI_11_20_1000_66) (random-answer knapPI_11_20_1000_66)
+)
 
 ;; (thin-the-herd penalized-score
 ;;                (random-generation 100 knapPI_11_20_1000_41)
@@ -36,7 +66,7 @@
 ;;            (partial simple-mutation flip-one-bit))
 ;; )
 (defn search
-  "Takes a search method"
+  "Returns a population that has been aged num-generations."
   [scorer strategy population-size instance num-generations]
   (last (take num-generations
               (iterate
@@ -44,5 +74,5 @@
                (random-generation population-size instance))))
   )
 
-
-(search penalized-score simple-mutation 100 knapPI_11_20_1000_41 100)
+(search penalized-score (partial crossover uniform-crossover) 100 knapPI_11_20_1000_41 100
+)

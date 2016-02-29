@@ -1,5 +1,6 @@
 (ns simple-search.experiment
-  (:require [simple-search.core :as core])
+  (:require [simple-search.core :as core
+             simple-ear])
   (:use simple-search.knapsack-examples.knapPI_11_20_1000
         simple-search.knapsack-examples.knapPI_13_20_1000
         simple-search.knapsack-examples.knapPI_16_20_1000
