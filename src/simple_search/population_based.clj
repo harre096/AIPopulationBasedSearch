@@ -48,12 +48,25 @@
 (defn n-point-crossover
   "Creates a child from an n-point crossover of two parents."
   [n mom dad]
-  (let
-    [split-points (sort (distinct (repeatedly n #(rand-int (count (:choices mom))))))]
-    split-points))
+  (make-answer
+    (:instance mom)
+    (let
+      [split-points (sort (distinct (repeatedly n #(rand-int (count (:choices mom))))))]
+      (reduce concat (map rand-nth
+        (map vector
+          (split-at-multiple split-points (:choices mom))
+          (split-at-multiple split-points (:choices dad))))))))
 
-(n-point-crossover 4 (random-answer knapPI_11_20_1000_66) (random-answer knapPI_11_20_1000_66)
-)
+(defn split-at-multiple
+  [points collection]
+  (loop [remaining-points points collection-stump collection split-collections []]
+    (if (empty? remaining-points) (conj split-collections collection-stump)
+      (recur
+        (map #(- % (first remaining-points)) (rest remaining-points))
+        (drop (first remaining-points) collection-stump)
+        (conj
+          split-collections
+          (take (first remaining-points) collection-stump))))))
 
 ;; (thin-the-herd penalized-score
 ;;                (random-generation 100 knapPI_11_20_1000_41)
@@ -74,5 +87,5 @@
                (random-generation population-size instance))))
   )
 
-(search penalized-score (partial crossover uniform-crossover) 100 knapPI_11_20_1000_41 100
+(search penalized-score (partial crossover (partial n-point-crossover 2)) 100 knapPI_11_20_1000_41 100
 )
