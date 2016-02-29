@@ -1,13 +1,13 @@
 (ns simple-search.experiment
-  (:require [simple-search.core :as core
-             simple-ear])
+  (:require [simple-search.population-based :as population]
+            [simple-search.core :as core])
   (:use simple-search.knapsack-examples.knapPI_11_20_1000
         simple-search.knapsack-examples.knapPI_13_20_1000
         simple-search.knapsack-examples.knapPI_16_20_1000
         simple-search.knapsack-examples.knapPI_11_200_1000
         simple-search.knapsack-examples.knapPI_13_200_1000
         simple-search.knapsack-examples.knapPI_16_200_1000
-	simple-search.knapsack-examples.knapPI_16_1000_1000))
+	      simple-search.knapsack-examples.knapPI_16_1000_1000))
 
 (defn run-experiment
   [searchers problems num-replications max-evals]
@@ -62,7 +62,7 @@
   (print-experimental-results
    (run-experiment [
                     (with-meta
-                      (partial core/random-restart core/flip-one-bit )
+                      (partial population/search core/flip-one-bit )
                       {:label "rand_reset_10_times"})
                     (with-meta
                       (partial core/hill-climber core/flip-one-bit)
