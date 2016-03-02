@@ -19,16 +19,16 @@
   [scorer strategy population]
   (thin-the-herd scorer population (strategy population)))
 
-(defn split-at-multiple
-  [points collection]
-  (loop [remaining-points points collection-stump collection split-collections []]
-    (if (empty? remaining-points) (conj split-collections collection-stump)
-      (recur
-        (map #(- % (first remaining-points)) (rest remaining-points))
-        (drop (first remaining-points) collection-stump)
-        (conj
-          split-collections
-          (take (first remaining-points) collection-stump))))))
+(defn build-parent-string
+  "Builds a parent determinant bit string from a sequence of chunk end points."
+  [endpoints]
+  (let [endpoints (into [] (sort endpoints))]
+    (flatten
+      (map-indexed
+        (fn [index length] (repeat length (if (even? index) 0 1)))
+        (map-indexed
+          (fn [index point] (if (> index 0) (- point (endpoints (- index 1))) point))
+          endpoints)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;Search Strategies;;;;;;;;
@@ -81,11 +81,23 @@
       (n-point (:choices mom) (:choices dad) [] 0 split-points)
        )))
 
+(defn cleaner-n-point-crossover
+  [n left right]
+  (let [length (count (:choices left))
+        endpoints (distinct (cons length (repeatedly n #(rand-int length))))
+        parent-string (build-parent-string endpoints)]
+    (make-answer
+      (:instance left)
+      (map-indexed
+        (fn [index pair] (nth pair (nth parent-string index)))
+        (map vector (:choices left) (:choices right))))))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;test n-point split
 ;; (defn testnpoint
 ;;   [n mum dad]
-;;  (n-point-crossover 3 mum dad)
+;;  (cleaner-n-point-crossover 3 mum dad)
 ;; )
 
 ;; (def mum (random-answer knapPI_11_20_1000_41))
@@ -95,7 +107,7 @@
 ;; (:choices dad)
 
 ;; (testnpoint 3 mum dad
-;; )
+)
 ;;;;END test n-point split
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
