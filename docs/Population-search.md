@@ -27,4 +27,15 @@ build new children until the population size is doubled. Then we
 The uniform crossover strategy, when building a child, selects values
 at random from the respective positions of both parents' choice strings.
 
-#### N-point crossover
+#### *n*-point crossover
+
+The *n*-point crossover strategy splits the parents' choice strings at
+*n* random locations and combines them in an alternating fashion:
+
+```
+2-point crossover:
+    Parent 1:        0 0 0 0 0 0 0 0 0 0
+    Parent 2:        1 1 1 1 1 1 1 1 1 1
+    Possible child:  0 0 0 1 1 1 0 0 0 0
+                          ^     ^
+```
