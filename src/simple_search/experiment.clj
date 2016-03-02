@@ -60,22 +60,37 @@
   ; resolve propertly.
   (ns simple-search.experiment)
   (print-experimental-results
-   (run-experiment [
-                    (with-meta
-                      (partial population/search core/flip-one-bit )
-                      {:label "rand_reset_10_times"})
-                    (with-meta
-                      (partial core/hill-climber core/flip-one-bit)
-                      {:label "half_random_half_hill_climber"})
-                    (with-meta
-                      (partial core/random-search)
-                      {:label "random_search"})]
-                   (map get-labelled-problem
-                        [
-                          "knapPI_11_20_1000_4" "knapPI_13_20_1000_4" "knapPI_16_20_1000_4"
-                          "knapPI_11_200_1000_4" "knapPI_13_200_1000_4" "knapPI_16_200_1000_4"
-                          "knapPI_16_1000_1000_3"
-                         ])
-                   (Integer/parseInt num-repetitions)
-                   (Integer/parseInt max-answers)))
+    (run-experiment
+      [(with-meta
+         (partial population/search
+                  core/penalized-score
+                  (partial population/simple-mutation core/flip-one-bit)
+                  100)
+         {:label "simple_mutation_pop_100"})
+       (with-meta
+         (partial population/search
+                  core/penalized-score
+                  (partial population/crossover population/uniform-crossover)
+                  100)
+         {:label "uniform_xo_pop_100"})
+       (with-meta
+         (partial population/search
+                  core/penalized-score
+                  (partial population/crossover (partial population/n-point-crossover 2))
+                  100)
+         {:label "2pt_xo_pop_100"})
+       (with-meta
+         (partial population/search
+                  core/penalized-score
+                  (partial population/crossover (partial population/n-point-crossover 3))
+                  100)
+         {:label "3pt_xo_pop_100"})]
+      (map get-labelled-problem
+        [
+           "knapPI_11_20_1000_4" "knapPI_13_20_1000_4" "knapPI_16_20_1000_4"
+           "knapPI_11_200_1000_4" "knapPI_13_200_1000_4" "knapPI_16_200_1000_4"
+           "knapPI_16_1000_1000_3"
+        ])
+     (Integer/parseInt num-repetitions) ;;repeat experiment
+     (Integer/parseInt max-answers))) ;;number of generations
   (shutdown-agents))

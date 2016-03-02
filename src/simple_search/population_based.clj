@@ -22,13 +22,15 @@
 (defn build-parent-string
   "Builds a parent determinant bit string from a sequence of chunk end points."
   [endpoints]
-  (let [endpoints (into [] (sort endpoints))]
+  (let [endpoints (vec (sort endpoints))]
     (flatten
       (map-indexed
         (fn [index length] (repeat length (if (even? index) 0 1)))
         (map-indexed
-          (fn [index point] (if (> index 0) (- point (endpoints (- index 1))) point))
+          (fn [index point] (if (= index 0) point (- point (endpoints (- index 1)))))
           endpoints)))))
+
+(build-parent-string '(3 6 10 16))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;Search Strategies;;;;;;;;
@@ -56,32 +58,7 @@
     (map rand-nth
       (map vector (:choices mom) (:choices dad)))))
 
-(defn n-point
-  "Builds child choices by flipping p1 and p2 choices with each recursion"
-  [p1 p2 child low split-points]
-  (println child)
-  (if (empty? split-points)
-    (flatten (conj child p1)) ;;return the flattend list of choices. remove flatten to see splits :D
-  (let [take-val (- (first split-points) low)]
-    (n-point
-     ;note that parents are being swapped
-     (drop take-val p2)
-     (drop take-val p1)
-     (conj child (take take-val p1))
-     (first split-points)
-     (rest split-points)))))
-
 (defn n-point-crossover
-  "Creates a child from an n-point crossover of two parents."
-  [n mom dad]
-  (make-answer
-    (:instance mom)
-    (let
-      [split-points (sort (distinct (repeatedly n #(rand-int (count (:choices mom))))))]
-      (n-point (:choices mom) (:choices dad) [] 0 split-points)
-       )))
-
-(defn cleaner-n-point-crossover
   [n left right]
   (let [length (count (:choices left))
         endpoints (distinct (cons length (repeatedly n #(rand-int length))))
@@ -107,7 +84,7 @@
 ;; (:choices dad)
 
 ;; (testnpoint 3 mum dad
-)
+;;)
 ;;;;END test n-point split
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -124,10 +101,11 @@
 (defn search
   "Returns a population that has been aged num-generations."
   [scorer strategy population-size instance num-generations]
-  (last (take num-generations
+  (last ;take the last result, since split-herd sorts asc.
+   (last (take num-generations ;take last generation
               (iterate
                (partial next-generation scorer strategy)
-               (random-generation population-size instance))))
+               (random-generation population-size instance)))))
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
