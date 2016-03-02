@@ -58,7 +58,32 @@
     (map rand-nth
       (map vector (:choices mom) (:choices dad)))))
 
+(defn n-point
+  "Builds child choices by flipping p1 and p2 choices with each recursion"
+  [p1 p2 child low split-points]
+  (println child)
+  (if (empty? split-points)
+    (flatten (conj child p1)) ;;return the flattend list of choices. remove flatten to see splits :D
+  (let [take-val (- (first split-points) low)]
+    (n-point
+     ;note that parents are being swapped
+     (drop take-val p2)
+     (drop take-val p1)
+     (conj child (take take-val p1))
+     (first split-points)
+     (rest split-points)))))
+
 (defn n-point-crossover
+  "Creates a child from an n-point crossover of two parents."
+  [n mom dad]
+  (make-answer
+    (:instance mom)
+    (let
+      [split-points (sort (distinct (repeatedly n #(rand-int (count (:choices mom))))))]
+      (n-point (:choices mom) (:choices dad) [] 0 split-points)
+       )))
+
+(defn weird-n-point-crossover
   [n left right]
   (let [length (count (:choices left))
         endpoints (distinct (cons length (repeatedly n #(rand-int length))))
@@ -72,19 +97,19 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;test n-point split
-;; (defn testnpoint
-;;   [n mum dad]
-;;  (cleaner-n-point-crossover 3 mum dad)
-;; )
+(defn testnpoint
+  [n mum dad]
+ (n-point-crossover 3 mum dad)
+)
 
-;; (def mum (random-answer knapPI_11_20_1000_41))
-;; (def dad (random-answer knapPI_11_20_1000_41))
+(def mum {:choices (repeat 20 0)})
+(def dad {:choices (repeat 20 1)})
 
-;; (:choices mum)
-;; (:choices dad)
+(:choices mum)
+(:choices dad)
 
-;; (testnpoint 3 mum dad
-;;)
+(testnpoint 3 mum dad
+)
 ;;;;END test n-point split
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
