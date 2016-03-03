@@ -4,8 +4,8 @@
 
 (defn random-generation
   "Generates a random population of the given size."
-  [population-size instance]
-  (repeatedly population-size (partial random-answer instance)))
+  [answer-function population-size instance]
+  (repeatedly population-size #(answer-function instance)))
 
 (defn thin-the-herd
   "Takes an old and new population. Finds the top half."
@@ -61,7 +61,6 @@
 (defn n-point
   "Builds child choices by flipping p1 and p2 choices with each recursion"
   [p1 p2 child low split-points]
-  (println child)
   (if (empty? split-points)
     (flatten (conj child p1)) ;;return the flattend list of choices. remove flatten to see splits :D
   (let [take-val (- (first split-points) low)]
@@ -97,19 +96,19 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;test n-point split
-(defn testnpoint
-  [n mum dad]
- (n-point-crossover 3 mum dad)
-)
-
-(def mum {:choices (repeat 20 0)})
-(def dad {:choices (repeat 20 1)})
-
-(:choices mum)
-(:choices dad)
-
-(testnpoint 3 mum dad
-)
+; (defn testnpoint
+;   [n mum dad]
+;  (n-point-crossover 3 mum dad)
+; )
+;
+; (def mum {:choices (repeat 20 0)})
+; (def dad {:choices (repeat 20 1)})
+;
+; (:choices mum)
+; (:choices dad)
+;
+; (testnpoint 3 mum dad
+; )
 ;;;;END test n-point split
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -125,12 +124,12 @@
 
 (defn search
   "Returns a population that has been aged num-generations."
-  [scorer strategy population-size instance num-generations]
+  [answer-function scorer strategy population-size instance num-generations]
   (last ;take the last result, since split-herd sorts asc.
    (last (take num-generations ;take last generation
               (iterate
                (partial next-generation scorer strategy)
-               (random-generation population-size instance)))))
+               (random-generation answer-function population-size instance)))))
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;

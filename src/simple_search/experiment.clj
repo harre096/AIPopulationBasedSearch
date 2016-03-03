@@ -1,6 +1,7 @@
 (ns simple-search.experiment
-  (:require [simple-search.population-based :as population]
-            [simple-search.core :as core])
+  (:require [simple-search.core :as core]
+            [simple-search.better-random :as better-random]
+            [simple-search.population-based :as population])
   (:use simple-search.knapsack-examples.knapPI_11_20_1000
         simple-search.knapsack-examples.knapPI_13_20_1000
         simple-search.knapsack-examples.knapPI_16_20_1000
@@ -63,28 +64,60 @@
     (run-experiment
       [(with-meta
          (partial population/search
+                  core/random-answer
                   core/penalized-score
                   (partial population/simple-mutation core/flip-one-bit)
                   100)
-         {:label "simple_mutation_pop_100"})
+         {:label "simple_mutation_pop_100_random"})
        (with-meta
          (partial population/search
+                  better-random/better-random-answer
+                  core/penalized-score
+                  (partial population/simple-mutation core/flip-one-bit)
+                  100)
+          {:label "simple_mutation_pop_100_greedy"})
+       (with-meta
+         (partial population/search
+                  core/random-answer
                   core/penalized-score
                   (partial population/crossover population/uniform-crossover)
                   100)
-         {:label "uniform_xo_pop_100"})
+         {:label "uniform_xo_pop_100_random"})
        (with-meta
          (partial population/search
+                  better-random/better-random-answer
+                  core/penalized-score
+                  (partial population/crossover population/uniform-crossover)
+                  100)
+         {:label "uniform_xo_pop_100_greedy"})
+       (with-meta
+         (partial population/search
+                  core/random-answer
                   core/penalized-score
                   (partial population/crossover (partial population/n-point-crossover 2))
                   100)
-         {:label "2pt_xo_pop_100"})
+         {:label "2pt_xo_pop_100_random"})
        (with-meta
          (partial population/search
+                  better-random/better-random-answer
+                  core/penalized-score
+                  (partial population/crossover (partial population/n-point-crossover 2))
+                  100)
+         {:label "2pt_xo_pop_100_greedy"})
+       (with-meta
+         (partial population/search
+                  core/random-answer
                   core/penalized-score
                   (partial population/crossover (partial population/n-point-crossover 3))
                   100)
-         {:label "3pt_xo_pop_100"})]
+         {:label "3pt_xo_pop_100_random"})
+       (with-meta
+         (partial population/search
+                  better-random/better-random-answer
+                  core/penalized-score
+                  (partial population/crossover (partial population/n-point-crossover 3))
+                  100)
+         {:label "3pt_xo_pop_100_greedy"})]
       (map get-labelled-problem
         [
            "knapPI_11_20_1000_4" "knapPI_13_20_1000_4" "knapPI_16_20_1000_4"
